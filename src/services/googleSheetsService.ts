@@ -1,8 +1,12 @@
 import { google } from "googleapis";
 
 const SPREADSHEET_ID = process.env.GOOGLE_SPREADSHEET_ID;
+console.log("SPREADSHEET ID", SPREADSHEET_ID);
 const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+console.log("PRIVATE KEY", privateKey);
+
 const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+console.log("EMAIL", clientEmail);
 
 if (!privateKey || !clientEmail || !SPREADSHEET_ID) {
   throw new Error(
