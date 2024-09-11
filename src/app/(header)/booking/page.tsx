@@ -51,14 +51,13 @@ const bookingPage = () => {
       try {
         const formattedDate = format(date, "yyyy-MM-dd");
 
-        // Obtén todas las reservas, no solo filtrando por banda
         const occupiedReservations = await fetchReservations(formattedDate);
 
         if (selectedDuration) {
           const available = calculateAvailableTimes(
-            occupiedReservations, // Todas las reservas ocupadas
+            occupiedReservations,
             selectedDuration,
-            date // Fecha seleccionada
+            date
           );
           setAvailableTimes(available);
         }
@@ -69,22 +68,21 @@ const bookingPage = () => {
     };
 
     loadReservations();
-  }, [date, selectedDuration]); // Quitamos "band" de la dependencia
+  }, [date, selectedDuration]);
 
   useEffect(() => {
     const loadBands = async () => {
       try {
-        console.log("Fetching bands");
+        //console.log("Fetching bands");
         const response = await fetch("/api/bands/getBands");
         const data = await response.json();
-        // Convertir los nombres a mayúsculas
         const upperCaseBands = data.map(
           (band: { id: string; name: string }) => ({
             ...band,
             name: band.name.toUpperCase(),
           })
         );
-        console.log("Bands fetched:", upperCaseBands);
+        //console.log("Bands fetched:", upperCaseBands);
         setBands(upperCaseBands);
       } catch (err) {
         console.error("Error fetching bands:", err);
@@ -100,7 +98,7 @@ const bookingPage = () => {
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
       const [startTime, endTime] = selectedStartTime.split(" a ");
-      console.log(
+      /* console.log(
         "Attempting to reserve for band:",
         band,
         " on date:",
@@ -109,7 +107,7 @@ const bookingPage = () => {
         startTime,
         "to",
         endTime
-      );
+      ); */
 
       const reservation = {
         bandId: selectedBandId,
@@ -135,7 +133,7 @@ const bookingPage = () => {
             <ToastAction altText="Goto schedule to undo">Cerrar</ToastAction>
           ),
         });
-        console.log("Reservation successful:", reservation);
+        //console.log("Reservation successful:", reservation);
         updateAvailableTimes(formattedDate); // Actualiza los horarios disponibles
       } else {
         toast({
@@ -151,7 +149,7 @@ const bookingPage = () => {
 
   const updateAvailableTimes = async (formattedDate: string) => {
     try {
-      console.log("Updating available times for date:", formattedDate);
+      //console.log("Updating available times for date:", formattedDate);
       const response = await fetch("/api/reservations/getReservations", {
         method: "POST",
         headers: {
@@ -161,15 +159,15 @@ const bookingPage = () => {
       });
 
       const occupiedReservations = await response.json();
-      console.log("Occupied reservations for update:", occupiedReservations);
+      //console.log("Occupied reservations for update:", occupiedReservations);
       if (selectedDuration !== null && date) {
-        console.log("Calculating available times during update");
+        //console.log("Calculating available times during update");
         const available = calculateAvailableTimes(
           occupiedReservations,
           selectedDuration,
           date
         );
-        console.log("Available times during update:", available);
+        //console.log("Available times during update:", available);
         setAvailableTimes(available);
         setSelectedStartTime(null); // Reinicia la selección de horario
       }
@@ -185,7 +183,7 @@ const bookingPage = () => {
   const handleSelectBand = (name: string) => {
     const selectedBand = bands.find((band) => band.name === name);
     if (selectedBand) {
-      console.log("Band selected:", selectedBand.name);
+      //console.log("Band selected:", selectedBand.name);
       setSelectedBandId(selectedBand.id);
       setBand(selectedBand.name);
     }
