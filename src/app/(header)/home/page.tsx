@@ -44,9 +44,13 @@ const HomePage = () => {
 
   return (
     <>
-      <div className="flex justify-start">
-        <h1 className="text-3xl font-bold mt-8">ENSAYAN HOY</h1>
-      </div>
+      {loading ? (
+        <></>
+      ) : (
+        <div className="flex justify-start">
+          <h1 className="text-3xl font-bold mt-8">ENSAYOS DE HOY</h1>
+        </div>
+      )}
 
       <div className="w-full max-w-4xl mx-auto p-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-6">
         {loading ? (
