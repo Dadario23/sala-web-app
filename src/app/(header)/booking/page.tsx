@@ -202,7 +202,7 @@ const bookingPage = () => {
           mode="single"
           selected={date}
           onSelect={(newDate) => {
-            console.log("Date selected:", newDate);
+            /* console.log("Date selected:", newDate); */
             setDate(newDate);
           }}
           className="rounded-md border shadow"
@@ -242,7 +242,7 @@ const bookingPage = () => {
             </Label>
             <Select
               onValueChange={(value) => {
-                console.log("Duration selected:", value);
+                /* console.log("Duration selected:", value); */
                 setSelectedDuration(parseInt(value));
               }}
             >

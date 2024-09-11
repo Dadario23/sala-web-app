@@ -3,28 +3,26 @@ import { format } from "date-fns";
 export const calculateAvailableTimes = (
   occupiedTimes: { startTime: string; endTime: string }[],
   duration: number,
-  date?: Date // Asegúrate de pasar "date" como argumento
+  date?: Date
 ) => {
   const now = new Date();
 
-  // Verificación si no hay fecha seleccionada
   if (!date) {
-    console.log("No date selected, returning empty array");
+    //console.log("No date selected, returning empty array");
     return [];
   }
 
-  // Verificar si la fecha seleccionada es hoy
   const isToday = format(date, "yyyy-MM-dd") === format(now, "yyyy-MM-dd");
   const currentHour = now.getHours();
 
-  console.log(
+  /* console.log(
     "Calculating available times for date:",
     date,
     "isToday:",
     isToday,
     "currentHour:",
     currentHour
-  );
+  ); */
 
   // Creamos los slots de inicio de 9:00 a 24:00
   const startTimeSlots = Array.from({ length: 16 }, (_, i) => i + 9);
@@ -33,18 +31,18 @@ export const calculateAvailableTimes = (
   const occupiedHours = occupiedTimes.flatMap((reservation) => {
     const startHour = parseInt(reservation.startTime.split(":")[0], 10);
     const endHour = parseInt(reservation.endTime.split(":")[0], 10);
-    console.log(
+    /* console.log(
       "Processing reservation:",
       reservation,
       "occupied from",
       startHour,
       "to",
       endHour
-    );
+    ); */
     return Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   });
 
-  console.log("Occupied hours:", occupiedHours);
+  //console.log("Occupied hours:", occupiedHours);
 
   // Reducimos los slots de tiempo para filtrar los que están disponibles
   const availableSlots = startTimeSlots.reduce(
@@ -53,7 +51,7 @@ export const calculateAvailableTimes = (
 
       // Si es el día de hoy, excluimos las horas que ya pasaron
       if (isToday && startHour <= currentHour) {
-        console.log(`Skipping ${startHour}:00 as it's in the past`);
+        //console.log(`Skipping ${startHour}:00 as it's in the past`);
         return acc; // Continuamos con el siguiente slot
       }
 
@@ -72,7 +70,7 @@ export const calculateAvailableTimes = (
     []
   );
 
-  console.log("Available slots:", availableSlots);
+  //console.log("Available slots:", availableSlots);
 
   return availableSlots;
 };
