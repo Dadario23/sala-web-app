@@ -25,9 +25,9 @@ const HomePage = () => {
     const loadReservations = async () => {
       setLoading(true);
       try {
-        const data = await fetchReservations();
+        const today = format(new Date(), "yyyy-MM-dd"); // Obtenemos la fecha actual
+        const data = await fetchReservations(today); // Pasamos la fecha a fetchReservations
 
-        const today = format(new Date(), "yyyy-MM-dd");
         const filteredReservations = filterReservationsForToday(data, today);
         const sortedReservations = sortReservationsByTime(filteredReservations);
 
