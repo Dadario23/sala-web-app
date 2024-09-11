@@ -183,7 +183,7 @@ const ReservationsPage = () => {
               id="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full"
+              className="flex justify-evenly"
             />
           </div>
 

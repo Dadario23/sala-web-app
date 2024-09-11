@@ -208,6 +208,7 @@ const bookingPage = () => {
           className="rounded-md border shadow"
           disabled={{ before: startOfToday() }}
           locale={es}
+          initialFocus
         />
 
         {date && (
