@@ -15,13 +15,20 @@ const Footer = () => {
           >
             Contacto: dandrada23@gmail.com
           </a>
-          <a href="https://tuperfil.com" className="text-sm hover:underline">
+          <a
+            href=""
+            className="text-sm hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Portafolio
           </a>
           {/* Puedes agregar tus redes sociales */}
           <a
             href="https://github.com/Dadario23"
             className="text-sm hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             GitHub
           </a>

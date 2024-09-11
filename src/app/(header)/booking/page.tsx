@@ -1,5 +1,7 @@
 "use client";
 import { Calendar } from "@/components/ui/calendar";
+import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardContent,
@@ -25,6 +27,8 @@ import { es } from "date-fns/locale";
 import { calculateAvailableTimes } from "@/utils/calculateAvailableTimes";
 import { format } from "date-fns";
 import { fetchReservations } from "@/services/frontend/fetchReservations";
+import Image from "next/image";
+import { ArrowLeftCircle } from "@geist-ui/icons";
 
 const bookingPage = () => {
   const [date, setDate] = React.useState<Date | undefined>(undefined);
@@ -43,6 +47,7 @@ const bookingPage = () => {
     null
   );
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const loadReservations = async () => {
@@ -190,116 +195,113 @@ const bookingPage = () => {
   };
 
   return (
-    <Card className="w-[350px] mx-auto mt-10">
-      <CardHeader>
-        <CardTitle>Reservar Sala</CardTitle>
-        <CardDescription>
-          Seleccione una fecha, una banda, duracion y horario disponible
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={(newDate) => {
-            /* console.log("Date selected:", newDate); */
-            setDate(newDate);
-          }}
-          className="rounded-md border shadow"
-          disabled={{ before: startOfToday() }}
-          locale={es}
-          initialFocus
-        />
+    <div className="flex flex-col items-start justify-center mt-8 sm:flex-row sm:items-start sm:justify-center">
+      <ArrowLeftCircle
+        className="cursor-pointer mb-8 sm:mb-0  w-8 h-8 mr-8"
+        onClick={() => router.back()}
+      />
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle>Reservar Sala</CardTitle>
+          <CardDescription>
+            Seleccione una fecha, una banda, duración y horario disponible
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(newDate) => setDate(newDate)}
+            className="rounded-md border shadow"
+            disabled={{ before: startOfToday() }}
+            locale={es}
+            initialFocus
+          />
 
-        {date && (
-          <div className="mt-4">
-            <Label htmlFor="band">Listado de bandas</Label>
-            <Select onValueChange={(value) => handleSelectBand(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccione la banda" />
-              </SelectTrigger>
-              <SelectContent>
-                {bands.map((band) => (
-                  <SelectItem key={band.id} value={band.name}>
-                    {band.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {date && (
+            <div className="mt-4">
+              <Label htmlFor="band">Listado de bandas</Label>
+              <Select onValueChange={(value) => handleSelectBand(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione la banda" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bands.map((band) => (
+                    <SelectItem key={band.id} value={band.name}>
+                      {band.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {isNewBand && (
-              <div className="mt-2">
-                <Label htmlFor="newBand">Nueva Banda</Label>
-                <Input
-                  id="newBand"
-                  placeholder="Nombre de la banda"
-                  onChange={(e) => setBand(e.target.value)}
-                />
-              </div>
-            )}
+              {isNewBand && (
+                <div className="mt-2">
+                  <Label htmlFor="newBand">Nueva Banda</Label>
+                  <Input
+                    id="newBand"
+                    placeholder="Nombre de la banda"
+                    onChange={(e) => setBand(e.target.value)}
+                  />
+                </div>
+              )}
 
-            <Label htmlFor="duration" className="mt-4">
-              Seleccione duración
-            </Label>
-            <Select
-              onValueChange={(value) => {
-                /* console.log("Duration selected:", value); */
-                setSelectedDuration(parseInt(value));
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Duración" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 HORA</SelectItem>
-                <SelectItem value="2">2 HORAS</SelectItem>
-                <SelectItem value="3">3 HORAS</SelectItem>
-                <SelectItem value="4">4 HORAS</SelectItem>
-                <SelectItem value="5">5 HORAS</SelectItem>
-              </SelectContent>
-            </Select>
+              <Label htmlFor="duration" className="mt-4">
+                Seleccione duración
+              </Label>
+              <Select
+                onValueChange={(value) => setSelectedDuration(parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Duración" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 HORA</SelectItem>
+                  <SelectItem value="2">2 HORAS</SelectItem>
+                  <SelectItem value="3">3 HORAS</SelectItem>
+                  <SelectItem value="4">4 HORAS</SelectItem>
+                  <SelectItem value="5">5 HORAS</SelectItem>
+                </SelectContent>
+              </Select>
 
-            {selectedDuration && (
-              <div className="mt-4">
-                <Label htmlFor="time">Seleccione horario</Label>
-                <Select
-                  onValueChange={(value) => {
-                    /* console.log("Start time selected:", value); */
-                    setSelectedStartTime(value);
-                  }}
-                  disabled={isReserved}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Horario disponible" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTimes.length > 0 ? (
-                      availableTimes.map((time, index) => (
-                        <SelectItem key={index} value={time}>
-                          {time}
+              {selectedDuration && (
+                <div className="mt-4">
+                  <Label htmlFor="time">Seleccione horario</Label>
+                  <Select
+                    onValueChange={(value) => setSelectedStartTime(value)}
+                    disabled={isReserved}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Horario disponible" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTimes.length > 0 ? (
+                        availableTimes.map((time, index) => (
+                          <SelectItem key={index} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem disabled value="no-horarios">
+                          No hay horarios disponibles
                         </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem disabled value="no-horarios">
-                        No hay horarios disponibles
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-            <Button
-              className="mt-4"
-              onClick={handleReservation}
-              disabled={!band || !selectedStartTime || isReserved}
-            >
-              Reservar
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              <Button
+                className="mt-4"
+                onClick={handleReservation}
+                disabled={!band || !selectedStartTime || isReserved}
+              >
+                Reservar
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
