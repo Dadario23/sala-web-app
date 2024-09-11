@@ -263,7 +263,7 @@ const bookingPage = () => {
                 <Label htmlFor="time">Seleccione horario</Label>
                 <Select
                   onValueChange={(value) => {
-                    console.log("Start time selected:", value);
+                    /* console.log("Start time selected:", value); */
                     setSelectedStartTime(value);
                   }}
                   disabled={isReserved}
