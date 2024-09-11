@@ -43,42 +43,48 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-14">
-      {loading ? (
-        <div className="flex justify-center items-center min-h-screen col-span-full">
-          <ClipLoader color="#3498db" loading={loading} size={50} />
-        </div>
-      ) : reservations.length > 0 ? (
-        reservations.map((reservation, index) => (
-          <Card
-            key={index}
-            className={`${
-              isPastReservation(reservation.endTime, currentTime)
-                ? "opacity-50"
-                : ""
-            }`}
-          >
-            <CardHeader>
-              <CardTitle>{reservation.bandName}</CardTitle>
-              <p className="text-sm text-gray-500">
-                {reservation.startTime} - {reservation.endTime}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <p>Ensayo de {reservation.bandName}</p>
-              <p className="text-sm text-gray-400">
-                Estado:{" "}
-                {isPastReservation(reservation.endTime, currentTime)
-                  ? "Finalizado"
-                  : "En progreso"}
-              </p>
-            </CardContent>
-          </Card>
-        ))
-      ) : (
-        <p className="text-center col-span-full">No hay reservas para hoy.</p>
-      )}
-    </div>
+    <>
+      <div className="flex justify-start">
+        <h1 className="text-3xl font-bold mt-8">ENSAYAN HOY</h1>
+      </div>
+
+      <div className="w-full max-w-4xl mx-auto p-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-6">
+        {loading ? (
+          <div className="flex justify-center items-center min-h-screen col-span-full">
+            <ClipLoader color="#3498db" loading={loading} size={50} />
+          </div>
+        ) : reservations.length > 0 ? (
+          reservations.map((reservation, index) => (
+            <Card
+              key={index}
+              className={`${
+                isPastReservation(reservation.endTime, currentTime)
+                  ? "opacity-50"
+                  : ""
+              }`}
+            >
+              <CardHeader>
+                <CardTitle>{reservation.bandName}</CardTitle>
+                <p className="text-sm text-gray-500">
+                  {reservation.startTime} - {reservation.endTime}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <p>Ensayo de {reservation.bandName}</p>
+                <p className="text-sm text-gray-400">
+                  Estado:{" "}
+                  {isPastReservation(reservation.endTime, currentTime)
+                    ? "Finalizado"
+                    : "En progreso"}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <p className="text-center col-span-full">No hay reservas para hoy.</p>
+        )}
+      </div>
+    </>
   );
 };
 
