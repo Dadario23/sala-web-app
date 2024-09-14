@@ -19,6 +19,9 @@ import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import editIcon from "@/assets/create-outline.svg";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { ArrowLeftCircle } from "@geist-ui/icons";
+import { ArrowRightCircle } from "@geist-ui/icons";
+import { useRouter } from "next/navigation";
 
 const BandsPage = () => {
   const [bands, setBands] = useState<{ id: string; name: string }[]>([]);
@@ -29,6 +32,7 @@ const BandsPage = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const loadBands = async () => {
@@ -163,108 +167,117 @@ const BandsPage = () => {
   };
 
   return (
-    <Card className="w-[350px] mx-auto mt-10">
-      <CardHeader>
-        <CardTitle>Gestión de Bandas</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Label>Agregar banda</Label>
-        <div className="flex items-center space-x-4 mt-2">
-          <Input
-            value={newBandName}
-            onChange={(e) => setNewBandName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddBand()}
-            placeholder="Nombre de la nueva banda"
-            className="flex-grow"
-          />
+    <div className="flex flex-col items-start justify-center mt-8 sm:flex-row sm:items-start sm:justify-center">
+      <ArrowLeftCircle
+        className="cursor-pointer mb-8 sm:mb-0 w-8 h-8 mr-8"
+        onClick={() => router.push("/home")}
+      />
 
-          <Button variant="secondary" onClick={handleAddBand}>
-            Agregar
-          </Button>
-        </div>
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle>Gestión de Bandas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Label>Agregar banda</Label>
+          <div className="flex items-center space-x-4 mt-2">
+            <Input
+              value={newBandName}
+              onChange={(e) => setNewBandName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddBand()}
+              placeholder="Nombre de la nueva banda"
+              className="flex-grow"
+            />
 
-        <h3 className="text-lg font-semibold mt-12 mb-4">Listado de Bandas</h3>
-
-        {loading ? (
-          <div className="flex justify-center items-center h-64 w-full">
-            <ClipLoader color="#3498db" loading={loading} size={25} />
+            <Button variant="secondary" onClick={handleAddBand}>
+              Agregar
+            </Button>
           </div>
-        ) : (
-          <Table>
-            <TableCaption>
-              Lista de bandas disponibles para gestionar.
-            </TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px]">Nombre de Banda</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bands.length > 0 ? (
-                bands.map((band) => (
-                  <TableRow key={band.id}>
-                    <TableCell>
-                      {editingBand && editingBand.id === band.id ? (
-                        <Input
-                          value={editingBand.name}
-                          onChange={(e) =>
-                            setEditingBand({
-                              ...editingBand,
-                              name: e.target.value.toUpperCase(), // Convertir a mayúsculas al editar
-                            })
-                          }
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleEditBand()
-                          } // Detecta la tecla Enter
-                          placeholder="Editar nombre de banda"
-                        />
-                      ) : (
-                        <span>{band.name}</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      {editingBand && editingBand.id === band.id ? (
-                        <Button variant="outline" onClick={handleEditBand}>
-                          Actualizar
-                        </Button>
-                      ) : (
-                        <>
-                          <div className="relative group inline-block">
-                            <button onClick={() => setEditingBand(band)}>
-                              <Image
-                                src={editIcon}
-                                alt="Editar"
-                                className="w-5 h-5"
-                              />
-                            </button>
-                            <span className="absolute left-1/2 transform -translate-x-1/2 -translate-y-8 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded py-1 px-2 pointer-events-none">
-                              Editar
-                            </span>
-                          </div>
-                          <ConfirmDeleteDialog
-                            item={band.id} // Asegúrate de pasar solo el ID
-                            onConfirm={handleDeleteBand} // Ya manejado en handleDeleteBand
-                            itemName={band.name}
-                            description="Sí la banda tiene reservas seran eliminadas ¿Estás seguro de que quieres eliminar la banda"
+
+          <h3 className="text-lg font-semibold mt-12 mb-4">
+            Listado de Bandas
+          </h3>
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64 w-full">
+              <ClipLoader color="#3498db" loading={loading} size={25} />
+            </div>
+          ) : (
+            <Table>
+              <TableCaption>
+                Lista de bandas disponibles para gestionar.
+              </TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[200px]">Nombre de Banda</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bands.length > 0 ? (
+                  bands.map((band) => (
+                    <TableRow key={band.id}>
+                      <TableCell>
+                        {editingBand && editingBand.id === band.id ? (
+                          <Input
+                            value={editingBand.name}
+                            onChange={(e) =>
+                              setEditingBand({
+                                ...editingBand,
+                                name: e.target.value.toUpperCase(), // Convertir a mayúsculas al editar
+                              })
+                            }
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && handleEditBand()
+                            } // Detecta la tecla Enter
+                            placeholder="Editar nombre de banda"
                           />
-                        </>
-                      )}
+                        ) : (
+                          <span>{band.name}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        {editingBand && editingBand.id === band.id ? (
+                          <Button variant="outline" onClick={handleEditBand}>
+                            Actualizar
+                          </Button>
+                        ) : (
+                          <>
+                            <div className="relative group inline-block">
+                              <button onClick={() => setEditingBand(band)}>
+                                <Image
+                                  src={editIcon}
+                                  alt="Editar"
+                                  className="w-5 h-5"
+                                />
+                              </button>
+                              <span className="absolute left-1/2 transform -translate-x-1/2 -translate-y-8 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded py-1 px-2 pointer-events-none">
+                                Editar
+                              </span>
+                            </div>
+                            <ConfirmDeleteDialog
+                              item={band.id} // Asegúrate de pasar solo el ID
+                              onConfirm={handleDeleteBand} // Ya manejado en handleDeleteBand
+                              itemName={band.name}
+                              description="Sí la banda tiene reservas seran eliminadas ¿Estás seguro de que quieres eliminar la banda"
+                            />
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center">
+                      No hay bandas disponibles
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={2} className="text-center">
-                    No hay bandas disponibles
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

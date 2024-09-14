@@ -7,6 +7,7 @@ import homeIcon from "../assets/home.svg";
 import bookingIcon from "../assets/calendar-number-outline.svg";
 import listReserve from "@/assets/list-outline.svg";
 import bandsIcon from "@/assets/people-outline.svg";
+import { Button } from "./ui/button";
 export default function Header() {
   const router = useRouter();
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -46,30 +47,38 @@ export default function Header() {
             isNavOpen ? "block" : "hidden"
           } lg:static lg:block lg:space-y-0 space-y-4 mt-4 lg:mt-0`}
         >
-          <a
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => handleClick("/home")}
             className="transition-colors text-gray-800 dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer"
           >
             <Image src={homeIcon} alt={"Home"} height={25} width={25} />
-          </a>
-          <a
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => handleClick("/booking")}
             className="transition-colors text-gray-800 dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer"
           >
             <Image src={bookingIcon} alt={"booking"} height={25} width={25} />
-          </a>
-          <a
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => handleClick("/reservations")}
             className="transition-colors text-gray-800 dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer"
           >
             <Image src={listReserve} alt={"booking"} height={25} width={25} />
-          </a>
-          <a
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => handleClick("/bands")}
             className="transition-colors text-gray-800 dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer"
           >
             <Image src={bandsIcon} alt={"bands"} height={25} width={25} />
-          </a>
+          </Button>
         </div>
       </div>
 

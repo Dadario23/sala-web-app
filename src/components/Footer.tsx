@@ -1,5 +1,7 @@
 import React from "react";
-
+import { Github } from "@geist-ui/icons";
+import logoWhatsapp from "@/assets/logo-whatsapp.svg";
+import Image from "next/image";
 const Footer = () => {
   return (
     <footer className="dark:bg-stone-900 text-white py-4 mt-8">
@@ -24,13 +26,14 @@ const Footer = () => {
             Portafolio
           </a>
           {/* Puedes agregar tus redes sociales */}
+          <Image src={logoWhatsapp} alt="logo-whatsapp" className="w-5" />
           <a
             href="https://github.com/Dadario23"
             className="text-sm hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
-            GitHub
+            <Github size={16} />
           </a>
         </div>
       </div>

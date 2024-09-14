@@ -23,6 +23,9 @@ import ClipLoader from "react-spinners/ClipLoader";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { useRouter } from "next/navigation";
+import { ArrowLeftCircle } from "@geist-ui/icons";
+import { ArrowRightCircle } from "@geist-ui/icons";
 
 interface Reservation {
   reservationId: string;
@@ -45,6 +48,7 @@ const ReservationsPage = () => {
   const [bands, setBands] = useState<Band[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const loadAllReservations = async () => {
@@ -146,104 +150,113 @@ const ReservationsPage = () => {
   };
 
   return (
-    <Card className="w-full max-w-[90%] md:max-w-[600px] mx-auto mt-10 h-auto">
-      <CardHeader>
-        <CardTitle className="text-center text-lg md:text-2xl">
-          Listado de Reservas
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-4 mb-4">
-          <div className="w-full">
-            <Label htmlFor="bandName">Filtrar reservas</Label>
-            <Select
-              value={bandName || "none"}
-              onValueChange={(value) =>
-                setBandName(value === "none" ? null : value)
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccione la banda" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">TODAS LAS RESERVAS</SelectItem>
-                {bands.map((band) => (
-                  <SelectItem key={band.id} value={band.name}>
-                    {band.name.toUpperCase()} {/* Mostrar en mayúsculas */}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <div className="flex flex-col items-start justify-center mt-8 sm:flex-row sm:items-start sm:justify-center">
+      <div className="flex flex-row justify-between w-full sm:w-auto mb-4">
+        <ArrowLeftCircle
+          className="cursor-pointer mb-8 sm:mb-0 w-8 h-8 mr-8"
+          onClick={() => router.push("/home")}
+        />
+      </div>
+
+      <Card className="w-full max-w-xs sm:max-w-sm md:max-w-4xl mx-auto px-4">
+        <CardHeader>
+          <CardTitle className="text-center text-lg md:text-2xl">
+            Listado de Reservas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-4 mb-4">
+            <div className="w-full">
+              <Label htmlFor="bandName">Filtrar reservas</Label>
+              <Select
+                value={bandName || "none"}
+                onValueChange={(value) =>
+                  setBandName(value === "none" ? null : value)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccione la banda" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">TODAS LAS RESERVAS</SelectItem>
+                  {bands.map((band) => (
+                    <SelectItem key={band.id} value={band.name}>
+                      {band.name.toUpperCase()} {/* Mostrar en mayúsculas */}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full">
+              <Label htmlFor="date">Filtrar por Fecha</Label>
+              <Input
+                type="date"
+                id="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="flex justify-evenly"
+              />
+            </div>
+
+            <Button onClick={handleSearch} className="w-full md:w-auto">
+              Buscar
+            </Button>
           </div>
 
-          <div className="w-full">
-            <Label htmlFor="date">Filtrar por Fecha</Label>
-            <Input
-              type="date"
-              id="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="flex justify-evenly"
-            />
-          </div>
-
-          <Button onClick={handleSearch} className="w-full md:w-auto">
-            Buscar
-          </Button>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center items-center h-64 w-full">
-            <ClipLoader color="#3498db" loading={loading} size={25} />
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table className="min-w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Banda</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Inicio</TableHead>
-                  <TableHead>Fin</TableHead>
-                  <TableHead className="w-20">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reservations.length > 0 ? (
-                  reservations.map((reservation, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{reservation.bandName}</TableCell>
-                      <TableCell>
-                        {reservation.date.split("-").reverse().join("-")}
-                      </TableCell>
-                      <TableCell>{reservation.startTime}</TableCell>
-                      <TableCell>{reservation.endTime}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-center">
-                          <ConfirmDeleteDialog
-                            item={reservation}
-                            onConfirm={handleDeleteReservation}
-                            itemName={reservation.bandName}
-                            description="¿Estás seguro de que quieres eliminar la reserva de"
-                            additionalInfo={reservation.date}
-                          />
-                        </div>
+          {loading ? (
+            <div className="flex justify-center items-center h-64 w-full">
+              <ClipLoader color="#3498db" loading={loading} size={25} />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="min-w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Banda</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Inicio</TableHead>
+                    <TableHead>Fin</TableHead>
+                    <TableHead className="w-20">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reservations.length > 0 ? (
+                    reservations.map((reservation, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{reservation.bandName}</TableCell>
+                        <TableCell>
+                          {reservation.date.split("-").reverse().join("-")}
+                        </TableCell>
+                        <TableCell>{reservation.startTime}</TableCell>
+                        <TableCell>{reservation.endTime}</TableCell>
+                        <TableCell>
+                          <div className="flex justify-center">
+                            <ConfirmDeleteDialog
+                              item={reservation}
+                              onConfirm={handleDeleteReservation}
+                              itemName={reservation.bandName}
+                              description="¿Estás seguro de que quieres eliminar la reserva de"
+                              additionalInfo={reservation.date}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center">
+                        No hay reservas disponibles
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center">
-                      No hay reservas disponibles
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

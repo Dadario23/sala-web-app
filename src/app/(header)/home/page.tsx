@@ -1,26 +1,24 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { format } from "date-fns";
+import { useRouter } from "next/navigation";
+import { ArrowRightCircle } from "@geist-ui/icons";
 import ClipLoader from "react-spinners/ClipLoader";
-import { isPastReservation } from "@/utils/dateUtils"; // Importamos la función
+import { fetchReservations } from "@/services/frontend/fetchReservations";
 import {
   filterReservationsForToday,
   sortReservationsByTime,
 } from "@/utils/reservationUtils";
+import { isPastReservation } from "@/utils/dateUtils";
+import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Reservation } from "@/types/Reservation";
-import { fetchReservations } from "@/services/frontend/fetchReservations";
 
 const HomePage = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [canGoBack, setCanGoBack] = useState(false); // Nuevo estado
+  const router = useRouter();
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -48,13 +46,33 @@ const HomePage = () => {
     loadReservations();
   }, []);
 
+  useEffect(() => {
+    // Verifica si hay historial de navegación
+    if (window.history.length > 1) {
+      setCanGoBack(true);
+      console.log("Hay historial para retroceder.");
+    } else {
+      setCanGoBack(false);
+      console.log("No hay historial para retroceder.");
+    }
+  }, []);
+
   return (
     <>
       {loading ? (
         <></>
       ) : (
-        <div className="flex justify-start">
-          <h1 className="text-3xl font-bold mt-8">ENSAYOS DE HOY</h1>
+        <div className="flex items-center justify-between w-full max-w-4xl mx-auto mt-8 px-4">
+          <h1 className="text-3xl font-bold">ENSAYOS DE HOY</h1>
+
+          {canGoBack && (
+            <ArrowRightCircle
+              className="cursor-pointer w-8 h-8 ml-4"
+              onClick={() => {
+                router.back();
+              }}
+            />
+          )}
         </div>
       )}
 

@@ -11,11 +11,10 @@ export default function HeaderLayout({
   return (
     <>
       <Header />
-      <div className="flex flex-col items-center h-auto overflow-y-auto">
-        {children}
+      <div className="flex flex-col min-h-screen">
+        <main className="flex flex-col flex-1 items-center">{children}</main>
+        <Footer />
       </div>
-      <Footer />
-      <Toaster />
     </>
   );
 }

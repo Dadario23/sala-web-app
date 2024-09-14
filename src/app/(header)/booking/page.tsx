@@ -1,7 +1,7 @@
 "use client";
 import { Calendar } from "@/components/ui/calendar";
 import { useRouter } from "next/navigation";
-
+import { ArrowRightCircle } from "@geist-ui/icons";
 import {
   Card,
   CardContent,
@@ -27,7 +27,6 @@ import { es } from "date-fns/locale";
 import { calculateAvailableTimes } from "@/utils/calculateAvailableTimes";
 import { format } from "date-fns";
 import { fetchReservations } from "@/services/frontend/fetchReservations";
-import Image from "next/image";
 import { ArrowLeftCircle } from "@geist-ui/icons";
 
 const bookingPage = () => {
@@ -197,9 +196,10 @@ const bookingPage = () => {
   return (
     <div className="flex flex-col items-start justify-center mt-8 sm:flex-row sm:items-start sm:justify-center">
       <ArrowLeftCircle
-        className="cursor-pointer mb-8 sm:mb-0  w-8 h-8 mr-8"
-        onClick={() => router.back()}
+        className="cursor-pointer mb-8 sm:mb-0 w-8 h-8 mr-8"
+        onClick={() => router.push("/home")}
       />
+
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Reservar Sala</CardTitle>
