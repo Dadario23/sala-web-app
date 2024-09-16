@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRightCircle } from "@geist-ui/icons";
@@ -20,59 +19,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
-  const reservations = useAppSelector(selectReservations); // Obtenemos todas las reservas del estado global
+  const reservations = useAppSelector(selectReservations);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [canGoBack, setCanGoBack] = useState(false);
+  const [reservationsLoaded, setReservationsLoaded] = useState(false);
   const router = useRouter();
 
-  const today = format(new Date(), "yyyy-MM-dd"); // Fecha de hoy
+  const today = format(new Date(), "yyyy-MM-dd");
 
-  // Intervalo para actualizar el tiempo actual
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Cargar reservas solo si no están en el estado global
   useEffect(() => {
     const loadReservations = async () => {
-      if (reservations.length > 0) {
-        console.log(
-          "HomePage: Ya hay reservas cargadas, no es necesario hacer una nueva solicitud."
-        );
-        setLoading(false);
-        return; // Si ya hay reservas, no se hace la llamada
-      }
-
       setLoading(true);
       setError(null);
-      try {
-        console.log("HomePage: Iniciando carga de reservas...");
-        console.log(`HomePage: Fecha de hoy: ${today}`);
-        const data = await fetchReservations(today);
-        console.log("HomePage: Reservas obtenidas:", data);
 
+      try {
+        const data = await fetchReservations(today);
         const filteredReservations = filterReservationsForToday(data, today);
         const sortedReservations = sortReservationsByTime(filteredReservations);
-        console.log(
-          "HomePage: Reservas filtradas y ordenadas:",
-          sortedReservations
-        );
 
-        dispatch(setReservations(sortedReservations)); // Solo guardamos reservas del día actual
+        dispatch(setReservations(sortedReservations));
+        setReservationsLoaded(true);
       } catch (err) {
-        console.error("HomePage: Error cargando reservas:", err);
-        setError("Error cargando reservas.");
+        setError(
+          "No se pudieron cargar las reservas. Por favor, intente más tarde."
+        );
       } finally {
         setLoading(false);
-        console.log("HomePage: Finalizó la carga de reservas");
       }
     };
 
-    loadReservations();
-  }, [dispatch, reservations]);
+    if (!reservationsLoaded && reservations.length === 0) {
+      loadReservations();
+    } else {
+      setLoading(false);
+    }
+  }, [dispatch, reservations, today, reservationsLoaded]);
 
   useEffect(() => {
     if (window.history.length > 1) {
@@ -82,16 +70,15 @@ const HomePage = () => {
     }
   }, []);
 
-  // Filtrar reservas del estado global para mostrar solo las del día actual
   const reservationsForToday = reservations.filter(
     (reservation) => reservation.date === today
   );
 
   return (
     <>
-      {error ? ( // Mostramos el error si existe
+      {error ? (
         <p className="text-red-500">{error}</p>
-      ) : loading ? ( // Mostramos el loader mientras cargan los datos
+      ) : loading ? (
         <div className="flex justify-center items-center min-h-screen">
           <ClipLoader color="#3498db" loading={loading} size={50} />
         </div>
@@ -106,9 +93,7 @@ const HomePage = () => {
             {canGoBack && (
               <ArrowRightCircle
                 className="cursor-pointer w-8 h-8 ml-4"
-                onClick={() => {
-                  router.back();
-                }}
+                onClick={() => router.back()}
               />
             )}
           </div>

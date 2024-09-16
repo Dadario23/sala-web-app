@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { deleteBand } from "@/services/bandService"; // Asegúrate de importar correctamente el servicio
+import { deleteBand } from "@/services/bandService"; 
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "DELETE") {
@@ -12,7 +12,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // Llamamos a deleteBand, que también eliminará las reservas asociadas
+    
     await deleteBand(id);
     res
       .status(200)

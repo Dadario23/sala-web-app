@@ -7,9 +7,9 @@ import {
   clearSheetRange,
 } from "./googleSheetsService";
 
-// Rango de la hoja donde se almacenan las bandas
-const BAND_SHEET_RANGE = "'Bandas'!A:B"; // A para ID, B para Nombre
-const RESERVATION_SHEET_RANGE = "'Reservas'!F:G"; // F para ID de la banda
+
+const BAND_SHEET_RANGE = "'Bandas'!A:B"; 
+const RESERVATION_SHEET_RANGE = "'Reservas'!F:G"; 
 
 /**
  * Agrega una nueva banda
@@ -20,7 +20,7 @@ export const addBand = async (name: string) => {
   const bandId = `B${uuidv4()}`;
   const bandName = name.toUpperCase();
 
-  // Verificar si la banda ya existe
+  
   const existingBands = await getBands();
   const exists = existingBands.some((band) => band.name === bandName);
 
@@ -28,7 +28,7 @@ export const addBand = async (name: string) => {
     throw new Error("La banda ya existe");
   }
 
-  // Agregar la nueva banda a la hoja
+  
   await appendToSheet(BAND_SHEET_RANGE, [[bandId, bandName]]);
 
   return {
@@ -43,27 +43,26 @@ export const addBand = async (name: string) => {
  * @returns Objeto indicando el éxito de la operación
  */
 export const deleteBand = async (id: string) => {
-  // Buscar la fila donde se encuentra la banda
   const rowIndex = await findBandRow(id);
   if (rowIndex === null) {
     throw new Error("Banda no encontrada");
   }
 
-  // Eliminar la banda de la hoja
+  
   await batchUpdateSheet([
     {
       deleteDimension: {
         range: {
-          sheetId: 0, // ID de la hoja
+          sheetId: 0, 
           dimension: "ROWS",
-          startIndex: rowIndex - 1, // La eliminación es cero indexada
+          startIndex: rowIndex - 1, 
           endIndex: rowIndex,
         },
       },
     },
   ]);
 
-  // Eliminar las reservas asociadas a la banda
+  
   await deleteBandReservations(id);
 
   return { success: true };
@@ -75,15 +74,13 @@ export const deleteBand = async (id: string) => {
  */
 const deleteBandReservations = async (bandId: string) => {
   const response = await getSheetValues(RESERVATION_SHEET_RANGE);
-  const rows = response.slice(1); // Omitimos la primera fila (encabezados)
+  const rows = response.slice(1); 
 
-  // Recorremos cada fila buscando el bandId en la columna F
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     if (row[0] === bandId) {
       // Si el bandId coincide
-      const rowIndex = i + 2; // +2 porque omitimos encabezados y Google Sheets usa índice basado en 1
-      // Limpiar las celdas de la fila de reservas
+      const rowIndex = i + 2; 
       await clearSheetRange(`'Reservas'!A${rowIndex}:G${rowIndex}`);
     }
   }
@@ -101,7 +98,7 @@ export const editBand = async (id: string, name: string) => {
     throw new Error("Banda no encontrada");
   }
 
-  // Actualizar el nombre de la banda en la columna B
+  
   await updateSheetValues(`'Bandas'!B${rowIndex}`, [[name.toUpperCase()]]);
 
   return {
@@ -115,7 +112,7 @@ export const editBand = async (id: string, name: string) => {
  * @returns Lista de bandas con su ID y nombre
  */
 export const getBands = async (): Promise<{ id: string; name: string }[]> => {
-  const rows = await getSheetValues("'Bandas'!A2:B"); // Desde la fila 2 para evitar el encabezado
+  const rows = await getSheetValues("'Bandas'!A2:B"); 
   return rows.map((row) => ({
     id: row[0],
     name: row[1],
@@ -130,5 +127,5 @@ export const getBands = async (): Promise<{ id: string; name: string }[]> => {
 const findBandRow = async (id: string): Promise<number | null> => {
   const rows = await getSheetValues("'Bandas'!A:A");
   const rowIndex = rows.findIndex((row) => row[0] === id);
-  return rowIndex >= 0 ? rowIndex + 1 : null; // Google Sheets usa indexación basada en 1
+  return rowIndex >= 0 ? rowIndex + 1 : null; 
 };

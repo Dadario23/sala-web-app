@@ -1,5 +1,5 @@
 import { addReservation } from "@/services/backend/reservation/addReservation";
-import { getReservations } from "@/services/backend/reservation/getReservations"; // Asegúrate de importar la función para obtener las reservas existentes
+import { getReservations } from "@/services/backend/reservation/getReservations";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
@@ -14,10 +14,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // 1. Obtener todas las reservas existentes para la fecha seleccionada
     const existingReservations = await getReservations(date);
-
-    // 2. Verificar si hay algún conflicto de horario
     const conflict = existingReservations.some((reservation) => {
       const reservationStart = parseInt(
         reservation.startTime.split(":")[0],
@@ -27,20 +24,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       const newStart = parseInt(startTime.split(":")[0], 10);
       const newEnd = parseInt(endTime.split(":")[0], 10);
 
-      // Comprobar si los tiempos se superponen
       return (
-        (newStart >= reservationStart && newStart < reservationEnd) || // Nuevo horario empieza dentro de uno existente
-        (newEnd > reservationStart && newEnd <= reservationEnd) || // Nuevo horario termina dentro de uno existente
-        (newStart < reservationStart && newEnd > reservationEnd) // Nuevo horario cubre completamente uno existente
+        (newStart >= reservationStart && newStart < reservationEnd) ||
+        (newEnd > reservationStart && newEnd <= reservationEnd) ||
+        (newStart < reservationStart && newEnd > reservationEnd)
       );
     });
 
-    // 3. Si hay conflicto, devolvemos un error
     if (conflict) {
       return res.status(400).json({ error: "El horario ya está reservado" });
     }
 
-    // 4. Si no hay conflicto, agregar la reserva
     const result = await addReservation(
       bandId,
       bandName,

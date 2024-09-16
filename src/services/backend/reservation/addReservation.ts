@@ -1,10 +1,6 @@
 import { RESERVATION_SHEET_RANGE } from "@/constants/sheets";
 import { appendToSheet } from "@/services/googleSheetsService";
 import { v4 as uuidv4 } from "uuid";
-
-/**
- * Agregar una nueva reserva
- */
 export const addReservation = async (
   bandId: string,
   bandName: string,
@@ -24,5 +20,6 @@ export const addReservation = async (
     date,
     startTime,
     endTime,
+    bandId,
   };
 };

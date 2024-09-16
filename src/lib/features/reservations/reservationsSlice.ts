@@ -18,7 +18,7 @@ const reservationsSlice = createSlice({
     setReservations: (state, action: PayloadAction<Reservation[]>) => {
       state.data = action.payload.map((reservation) => ({
         ...reservation,
-        bandId: reservation.bandId || null, // Asegurarte de que todas tengan bandId
+        bandId: reservation.bandId || null,
       }));
       state.lastFetched = new Date().toISOString();
     },
@@ -45,35 +45,22 @@ const reservationsSlice = createSlice({
         state.data[index] = action.payload;
       }
     },
-    // Nueva acción para eliminar todas las reservas de una banda específica
-    deleteReservationsByBand: (state, action: PayloadAction<string>) => {
-      console.log("Band ID a eliminar:", action.payload);
-      if (!state.data) {
-        console.error("El estado de las reservas es nulo o indefinido");
-        return;
-      }
-      console.log("Reservas antes de eliminar:", state.data);
 
+    deleteReservationsByBand: (state, action: PayloadAction<string>) => {
       state.data = state.data.filter(
         (reservation) => reservation.bandId !== action.payload
-      );
-
-      console.log(
-        "Reservas actualizadas después de eliminar la banda:",
-        state.data
       );
     },
   },
 });
 
-// Exportamos las acciones
 export const {
   setReservations,
   addReservation,
   clearReservations,
   deleteReservation,
   updateReservation,
-  deleteReservationsByBand, // Nueva acción exportada
+  deleteReservationsByBand,
 } = reservationsSlice.actions;
 
 export const selectReservations = (state: {

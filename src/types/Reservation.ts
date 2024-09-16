@@ -1,9 +1,9 @@
 export interface Reservation {
   reservationId: string;
-  bandId: string | null; // Asegúrate de que todas las reservas tengan un bandId
+  bandId: string | null;
   bandName: string;
   date: string;
   startTime: string;
   endTime: string;
-  status?: string; // Campo opcional
+  status?: string;
 }

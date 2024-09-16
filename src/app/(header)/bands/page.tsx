@@ -23,9 +23,9 @@ import {
   setBands as setReduxBands,
   selectBands,
 } from "@/lib/features/bands/bandsSlice";
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog"; // Asumo que esto está presente
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import Image from "next/image";
-import editIcon from "@/assets/create-outline.svg"; // Asumo que existe el ícono
+import editIcon from "@/assets/create-outline.svg";
 import { deleteReservationsByBand } from "@/lib/features/reservations/reservationsSlice";
 
 const BandsPage = () => {
@@ -37,6 +37,7 @@ const BandsPage = () => {
     name: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [bandsLoaded, setBandsLoaded] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -53,6 +54,7 @@ const BandsPage = () => {
               data.map((band) => ({ ...band, name: band.name.toUpperCase() }))
             )
           );
+          setBandsLoaded(true);
         }
       } catch (error) {
         console.error("Error fetching bands:", error);
@@ -61,11 +63,12 @@ const BandsPage = () => {
       }
     };
 
-    // Si no hay bandas en el estado global, realiza el fetch
-    if (globalBands.length === 0) {
+    if (globalBands.length === 0 && !bandsLoaded) {
       loadBands();
+    } else {
+      setLoading(false);
     }
-  }, [dispatch, globalBands]);
+  }, [dispatch, globalBands, bandsLoaded]);
 
   const handleAddBand = async () => {
     if (newBandName) {
@@ -118,16 +121,7 @@ const BandsPage = () => {
       });
 
       if (response.ok) {
-        // Asegurarse de que las reservas están cargadas antes de despachar la acción
-        /* if (reservations.length === 0) {
-          console.error("No hay reservas cargadas, abortando la eliminación");
-          return;
-        } */
-
-        // Elimina la banda del estado global
         dispatch(setReduxBands(globalBands.filter((band) => band.id !== id)));
-
-        // Elimina todas las reservas asociadas a la banda del estado global
         dispatch(deleteReservationsByBand(id));
 
         toast({

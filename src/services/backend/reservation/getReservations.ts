@@ -9,14 +9,12 @@ export const getReservations = async (date?: string, bandName?: string) => {
   }
 
   return rows
-    .slice(1) // Omitimos los encabezados
+    .slice(1)
     .filter((row) => row[0] && row[1] && row[2] && row[3] && row[4] && row[6])
     .filter((row) => {
-      const reservationDate = row[1]; // Fecha de la reserva
+      const reservationDate = row[1];
       const matchesDate = date ? reservationDate === date : true;
-
-      // Filtrar por banda solo si se ha proporcionado un nombre
-      const reservationBand = row[0].trim().toLowerCase(); // Banda en la reserva
+      const reservationBand = row[0].trim().toLowerCase();
       const filterBand = bandName ? bandName.trim().toLowerCase() : null;
       const matchesBand = bandName ? reservationBand === filterBand : true;
 
@@ -28,6 +26,7 @@ export const getReservations = async (date?: string, bandName?: string) => {
       startTime: row[2],
       endTime: row[3],
       status: row[4],
+      bandId: row[5],
       reservationId: row[6],
     }));
 };

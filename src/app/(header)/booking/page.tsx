@@ -27,10 +27,8 @@ import { calculateAvailableTimes } from "@/utils/calculateAvailableTimes";
 import { format } from "date-fns";
 import { fetchReservations } from "@/services/frontend/fetchReservations";
 import { ArrowLeftCircle } from "@geist-ui/icons";
-
-// Importamos useDispatch de Redux y la acción para agregar una reserva
 import { useDispatch } from "react-redux";
-import { addReservation as addReservationToStore } from "@/lib/features/reservations/reservationsSlice"; // Renombrar la acción de Redux para evitar confusión
+import { addReservation as addReservationToStore } from "@/lib/features/reservations/reservationsSlice";
 
 const bookingPage = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -45,7 +43,7 @@ const bookingPage = () => {
   const [selectedBandId, setSelectedBandId] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
-  const dispatch = useDispatch(); // Hook de Redux para despachar acciones
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loadReservations = async () => {
@@ -53,11 +51,7 @@ const bookingPage = () => {
 
       try {
         const formattedDate = format(date, "yyyy-MM-dd");
-        console.log(
-          `BookingPage: Cargando reservas para la fecha: ${formattedDate}`
-        );
         const occupiedReservations = await fetchReservations(formattedDate);
-        console.log("BookingPage: Reservas ocupadas:", occupiedReservations);
 
         if (selectedDuration) {
           const available = calculateAvailableTimes(
@@ -65,7 +59,7 @@ const bookingPage = () => {
             selectedDuration,
             date
           );
-          console.log("BookingPage: Horarios disponibles:", available);
+
           setAvailableTimes(available);
         }
       } catch (err) {
@@ -80,7 +74,6 @@ const bookingPage = () => {
   useEffect(() => {
     const loadBands = async () => {
       try {
-        console.log("BookingPage: Cargando bandas...");
         const response = await fetch("/api/bands/getBands");
         const data = await response.json();
         const upperCaseBands = data.map(
@@ -89,7 +82,7 @@ const bookingPage = () => {
             name: band.name.toUpperCase(),
           })
         );
-        console.log("BookingPage: Bandas obtenidas:", upperCaseBands);
+
         setBands(upperCaseBands);
       } catch (err) {
         console.error("BookingPage: Error cargando bandas:", err);
@@ -105,13 +98,6 @@ const bookingPage = () => {
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
       const [startTime, endTime] = selectedStartTime.split(" a ");
-      console.log("BookingPage: Creando reserva con los datos:", {
-        bandId: selectedBandId,
-        bandName: band,
-        date: formattedDate,
-        startTime,
-        endTime,
-      });
 
       const response = await fetch("/api/reservations/addReservation", {
         method: "POST",
@@ -128,10 +114,6 @@ const bookingPage = () => {
       });
 
       const data = await response.json();
-      console.log(
-        "BookingPage: Respuesta del servidor al crear la reserva:",
-        data
-      );
 
       if (response.ok && data.result) {
         const { reservationId } = data.result;
@@ -168,9 +150,6 @@ const bookingPage = () => {
 
   const updateAvailableTimes = async (formattedDate: string) => {
     try {
-      console.log(
-        `BookingPage: Actualizando horarios disponibles para: ${formattedDate}`
-      );
       const response = await fetch("/api/reservations/getReservations", {
         method: "POST",
         headers: {
@@ -180,10 +159,7 @@ const bookingPage = () => {
       });
 
       const occupiedReservations = await response.json();
-      console.log(
-        "BookingPage: Horarios ocupados actualizados:",
-        occupiedReservations
-      );
+
       if (selectedDuration !== null && date) {
         const available = calculateAvailableTimes(
           occupiedReservations,
@@ -191,7 +167,7 @@ const bookingPage = () => {
           date
         );
         setAvailableTimes(available);
-        setSelectedStartTime(null); // Reinicia la selección de horario
+        setSelectedStartTime(null);
       }
     } catch (err) {
       console.error("BookingPage: Error actualizando horarios:", err);

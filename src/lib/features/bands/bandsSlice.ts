@@ -1,11 +1,6 @@
-// src/lib/features/bands/bandsSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "@/lib/store";
-
-interface Band {
-  id: string;
-  name: string;
-}
+import { Band } from "@/types/band";
 
 interface BandsState {
   bands: Band[];

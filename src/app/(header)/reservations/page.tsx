@@ -37,41 +37,42 @@ const ReservationsPage = () => {
   const [bandName, setBandName] = useState<string | null>(null);
   const [filteredReservations, setFilteredReservations] = useState<
     Reservation[]
-  >([]); // Estado local para reservas filtradas
+  >([]);
   const [bands, setBands] = useState<Band[]>([]);
   const [loading, setLoading] = useState(false);
+  const [reservationsLoaded, setReservationsLoaded] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  const reservations = useAppSelector((state) => state.reservations.data); // Obtenemos reservas del estado global
+  const reservations = useAppSelector((state) => state.reservations.data);
   const dispatch = useAppDispatch();
 
-  // Cargar todas las reservas si no están en el estado global
-  const loadAllReservations = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/reservations/getAllReservations");
-      const data = await response.json();
-      const formattedReservations = data.map((reservation: Reservation) => ({
-        ...reservation,
-        bandName: reservation.bandName.toUpperCase(),
-      }));
-
-      dispatch(setReservations(formattedReservations)); // Guardamos todas las reservas en el estado global
-      setFilteredReservations(formattedReservations); // También actualizamos el estado local
-    } catch (err) {
-      console.error("Error fetching all reservations:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (reservations.length === 0) {
-      loadAllReservations(); // Si no hay reservas, las cargamos desde el servidor
+    const loadAllReservations = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/reservations/getAllReservations");
+        const data = await response.json();
+        const formattedReservations = data.map((reservation: Reservation) => ({
+          ...reservation,
+          bandName: reservation.bandName.toUpperCase(),
+        }));
+
+        dispatch(setReservations(formattedReservations));
+        setFilteredReservations(formattedReservations);
+        setReservationsLoaded(true);
+      } catch (err) {
+        console.error("Error fetching all reservations:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (reservations.length === 0 && !reservationsLoaded) {
+      loadAllReservations();
     } else {
-      setFilteredReservations(reservations); // Inicialmente mostramos todas las reservas
+      setFilteredReservations(reservations);
     }
-  }, [dispatch, reservations]);
+  }, [dispatch, reservations, reservationsLoaded]);
 
   useEffect(() => {
     const loadBands = async () => {
@@ -86,7 +87,6 @@ const ReservationsPage = () => {
     loadBands();
   }, []);
 
-  // Filtrar las reservas según la banda y la fecha
   const handleSearch = () => {
     const filtered = reservations.filter((reservation) => {
       const matchesBand =
@@ -94,10 +94,9 @@ const ReservationsPage = () => {
       const matchesDate = !date || reservation.date === date;
       return matchesBand && matchesDate;
     });
-    setFilteredReservations(filtered); // Solo actualizamos el estado local
+    setFilteredReservations(filtered);
   };
 
-  // Eliminar una reserva
   const handleDeleteReservation = async (reservation: Reservation) => {
     try {
       const response = await fetch("/api/reservations/deleteReservation", {
@@ -117,6 +116,10 @@ const ReservationsPage = () => {
       toast({ title: "Error al eliminar la reserva" });
     }
   };
+
+  useEffect(() => {
+    console.log("Estado de las reservas actualizado:", reservations);
+  }, [reservations]);
 
   return (
     <div className="flex flex-col items-start justify-center mt-8 sm:flex-row sm:items-start sm:justify-center">
