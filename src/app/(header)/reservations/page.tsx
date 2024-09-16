@@ -127,7 +127,7 @@ const ReservationsPage = () => {
         />
       </div>
 
-      <Card className="w-full max-w-xs sm:max-w-sm md:max-w-4xl mx-auto px-4">
+      <Card className="w-full max-w-[330px] sm:max-w-sm md:max-w-4xl mx-auto px-4">
         <CardHeader>
           <CardTitle className="text-center text-lg md:text-2xl">
             Listado de Reservas
@@ -182,8 +182,10 @@ const ReservationsPage = () => {
               <Table className="min-w-full">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-1/4 sm:w-auto min-w-[7rem]">
+                      Fecha
+                    </TableHead>
                     <TableHead>Banda</TableHead>
-                    <TableHead>Fecha</TableHead>
                     <TableHead>Inicio</TableHead>
                     <TableHead>Fin</TableHead>
                     <TableHead className="w-20">Acciones</TableHead>
@@ -193,10 +195,10 @@ const ReservationsPage = () => {
                   {filteredReservations.length > 0 ? (
                     filteredReservations.map((reservation, index) => (
                       <TableRow key={index}>
-                        <TableCell>{reservation.bandName}</TableCell>
                         <TableCell>
                           {reservation.date.split("-").reverse().join("-")}
                         </TableCell>
+                        <TableCell>{reservation.bandName}</TableCell>
                         <TableCell>{reservation.startTime}</TableCell>
                         <TableCell>{reservation.endTime}</TableCell>
                         <TableCell>
