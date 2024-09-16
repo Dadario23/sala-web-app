@@ -1,7 +1,6 @@
 "use client";
 import { Calendar } from "@/components/ui/calendar";
 import { useRouter } from "next/navigation";
-import { ArrowRightCircle } from "@geist-ui/icons";
 import {
   Card,
   CardContent,
@@ -29,24 +28,24 @@ import { format } from "date-fns";
 import { fetchReservations } from "@/services/frontend/fetchReservations";
 import { ArrowLeftCircle } from "@geist-ui/icons";
 
+// Importamos useDispatch de Redux y la acción para agregar una reserva
+import { useDispatch } from "react-redux";
+import { addReservation as addReservationToStore } from "@/lib/features/reservations/reservationsSlice"; // Renombrar la acción de Redux para evitar confusión
+
 const bookingPage = () => {
-  const [date, setDate] = React.useState<Date | undefined>(undefined);
-  const [selectedDuration, setSelectedDuration] = React.useState<number | null>(
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [selectedStartTime, setSelectedStartTime] = useState<string | null>(
     null
   );
-  const [availableTimes, setAvailableTimes] = React.useState<string[]>([]);
-  const [selectedStartTime, setSelectedStartTime] = React.useState<
-    string | null
-  >(null);
-  const [band, setBand] = React.useState<string | null>(null);
+  const [band, setBand] = useState<string | null>(null);
   const [bands, setBands] = useState<{ id: string; name: string }[]>([]);
-  const [isNewBand, setIsNewBand] = React.useState<boolean>(false);
-  const [isReserved, setIsReserved] = React.useState<boolean>(false);
-  const [selectedBandId, setSelectedBandId] = React.useState<string | null>(
-    null
-  );
+  const [isNewBand, setIsNewBand] = useState<boolean>(false);
+  const [selectedBandId, setSelectedBandId] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const dispatch = useDispatch(); // Hook de Redux para despachar acciones
 
   useEffect(() => {
     const loadReservations = async () => {
@@ -54,8 +53,11 @@ const bookingPage = () => {
 
       try {
         const formattedDate = format(date, "yyyy-MM-dd");
-
+        console.log(
+          `BookingPage: Cargando reservas para la fecha: ${formattedDate}`
+        );
         const occupiedReservations = await fetchReservations(formattedDate);
+        console.log("BookingPage: Reservas ocupadas:", occupiedReservations);
 
         if (selectedDuration) {
           const available = calculateAvailableTimes(
@@ -63,10 +65,11 @@ const bookingPage = () => {
             selectedDuration,
             date
           );
+          console.log("BookingPage: Horarios disponibles:", available);
           setAvailableTimes(available);
         }
       } catch (err) {
-        console.error("Error fetching reservations:", err);
+        console.error("BookingPage: Error cargando reservas:", err);
         setAvailableTimes([]);
       }
     };
@@ -77,7 +80,7 @@ const bookingPage = () => {
   useEffect(() => {
     const loadBands = async () => {
       try {
-        //console.log("Fetching bands");
+        console.log("BookingPage: Cargando bandas...");
         const response = await fetch("/api/bands/getBands");
         const data = await response.json();
         const upperCaseBands = data.map(
@@ -86,10 +89,10 @@ const bookingPage = () => {
             name: band.name.toUpperCase(),
           })
         );
-        //console.log("Bands fetched:", upperCaseBands);
+        console.log("BookingPage: Bandas obtenidas:", upperCaseBands);
         setBands(upperCaseBands);
       } catch (err) {
-        console.error("Error fetching bands:", err);
+        console.error("BookingPage: Error cargando bandas:", err);
       }
     };
 
@@ -102,43 +105,55 @@ const bookingPage = () => {
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
       const [startTime, endTime] = selectedStartTime.split(" a ");
-      /* console.log(
-        "Attempting to reserve for band:",
-        band,
-        " on date:",
-        formattedDate,
-        "from",
-        startTime,
-        "to",
-        endTime
-      ); */
-
-      const reservation = {
+      console.log("BookingPage: Creando reserva con los datos:", {
         bandId: selectedBandId,
         bandName: band,
         date: formattedDate,
         startTime,
         endTime,
-      };
+      });
 
       const response = await fetch("/api/reservations/addReservation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(reservation),
+        body: JSON.stringify({
+          bandId: selectedBandId,
+          bandName: band,
+          date: formattedDate,
+          startTime,
+          endTime,
+        }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      console.log(
+        "BookingPage: Respuesta del servidor al crear la reserva:",
+        data
+      );
+
+      if (response.ok && data.result) {
+        const { reservationId } = data.result;
+
         toast({
           title: "Reserva realizada con éxito",
           description: `Para la banda ${band} el dia ${formattedDate} de ${startTime} a ${endTime}`,
-          action: (
-            <ToastAction altText="Goto schedule to undo">Cerrar</ToastAction>
-          ),
+          action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
         });
-        //console.log("Reservation successful:", reservation);
-        updateAvailableTimes(formattedDate); // Actualiza los horarios disponibles
+
+        dispatch(
+          addReservationToStore({
+            reservationId: reservationId,
+            bandId: selectedBandId,
+            bandName: band,
+            date: formattedDate,
+            startTime,
+            endTime,
+          })
+        );
+
+        updateAvailableTimes(formattedDate);
       } else {
         toast({
           title: "Error",
@@ -147,13 +162,15 @@ const bookingPage = () => {
         });
       }
     } catch (err) {
-      console.error("Error realizando la reserva:", err);
+      console.error("BookingPage: Error realizando la reserva:", err);
     }
   };
 
   const updateAvailableTimes = async (formattedDate: string) => {
     try {
-      //console.log("Updating available times for date:", formattedDate);
+      console.log(
+        `BookingPage: Actualizando horarios disponibles para: ${formattedDate}`
+      );
       const response = await fetch("/api/reservations/getReservations", {
         method: "POST",
         headers: {
@@ -163,23 +180,21 @@ const bookingPage = () => {
       });
 
       const occupiedReservations = await response.json();
-      //console.log("Occupied reservations for update:", occupiedReservations);
+      console.log(
+        "BookingPage: Horarios ocupados actualizados:",
+        occupiedReservations
+      );
       if (selectedDuration !== null && date) {
-        //console.log("Calculating available times during update");
         const available = calculateAvailableTimes(
           occupiedReservations,
           selectedDuration,
           date
         );
-        //console.log("Available times during update:", available);
         setAvailableTimes(available);
         setSelectedStartTime(null); // Reinicia la selección de horario
       }
     } catch (err) {
-      console.error(
-        "Error fetching updated reservations from Google Sheets:",
-        err
-      );
+      console.error("BookingPage: Error actualizando horarios:", err);
       setAvailableTimes([]);
     }
   };
@@ -187,7 +202,6 @@ const bookingPage = () => {
   const handleSelectBand = (name: string) => {
     const selectedBand = bands.find((band) => band.name === name);
     if (selectedBand) {
-      //console.log("Band selected:", selectedBand.name);
       setSelectedBandId(selectedBand.id);
       setBand(selectedBand.name);
     }
@@ -268,7 +282,6 @@ const bookingPage = () => {
                   <Label htmlFor="time">Seleccione horario</Label>
                   <Select
                     onValueChange={(value) => setSelectedStartTime(value)}
-                    disabled={isReserved}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Horario disponible" />
@@ -293,7 +306,7 @@ const bookingPage = () => {
               <Button
                 className="mt-4"
                 onClick={handleReservation}
-                disabled={!band || !selectedStartTime || isReserved}
+                disabled={!band || !selectedStartTime}
               >
                 Reservar
               </Button>

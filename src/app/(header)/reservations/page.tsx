@@ -22,130 +22,99 @@ import {
 import ClipLoader from "react-spinners/ClipLoader";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { useToast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  setReservations,
+  deleteReservation as deleteReservationAction,
+} from "@/lib/features/reservations/reservationsSlice";
 import { ArrowLeftCircle } from "@geist-ui/icons";
-import { ArrowRightCircle } from "@geist-ui/icons";
-
-interface Reservation {
-  reservationId: string;
-  bandName: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-}
-
-interface Band {
-  id: string;
-  name: string;
-}
+import { Band } from "@/types/band";
+import { Reservation } from "@/types/Reservation";
 
 const ReservationsPage = () => {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [date, setDate] = useState("");
   const [bandName, setBandName] = useState<string | null>(null);
-
+  const [filteredReservations, setFilteredReservations] = useState<
+    Reservation[]
+  >([]); // Estado local para reservas filtradas
   const [bands, setBands] = useState<Band[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const reservations = useAppSelector((state) => state.reservations.data); // Obtenemos reservas del estado global
+  const dispatch = useAppDispatch();
+
+  // Cargar todas las reservas si no están en el estado global
+  const loadAllReservations = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/reservations/getAllReservations");
+      const data = await response.json();
+      const formattedReservations = data.map((reservation: Reservation) => ({
+        ...reservation,
+        bandName: reservation.bandName.toUpperCase(),
+      }));
+
+      dispatch(setReservations(formattedReservations)); // Guardamos todas las reservas en el estado global
+      setFilteredReservations(formattedReservations); // También actualizamos el estado local
+    } catch (err) {
+      console.error("Error fetching all reservations:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadAllReservations = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch("/api/reservations/getAllReservations");
-        const data = await response.json();
-        setReservations(
-          data.map((reservation: Reservation) => ({
-            ...reservation,
-            bandName: reservation.bandName.toUpperCase(),
-          }))
-        );
-      } catch (err) {
-        console.error("Error fetching all reservations:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAllReservations();
-  }, []);
+    if (reservations.length === 0) {
+      loadAllReservations(); // Si no hay reservas, las cargamos desde el servidor
+    } else {
+      setFilteredReservations(reservations); // Inicialmente mostramos todas las reservas
+    }
+  }, [dispatch, reservations]);
 
   useEffect(() => {
     const loadBands = async () => {
       try {
         const response = await fetch("/api/bands/getBands");
         const data = await response.json();
-
         setBands(data);
       } catch (err) {
         console.error("Error fetching bands:", err);
       }
     };
-
     loadBands();
   }, []);
 
-  const handleSearch = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/reservations/getReservations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          date,
-          bandName: bandName || null,
-        }),
-      });
-
-      const data = await response.json();
-      setReservations(
-        data.map((reservation: Reservation) => ({
-          ...reservation,
-          bandName: reservation.bandName.toUpperCase(),
-        }))
-      );
-    } catch (error) {
-      console.error("Error fetching reservations:", error);
-    } finally {
-      setLoading(false);
-    }
+  // Filtrar las reservas según la banda y la fecha
+  const handleSearch = () => {
+    const filtered = reservations.filter((reservation) => {
+      const matchesBand =
+        !bandName || reservation.bandName === bandName.toUpperCase();
+      const matchesDate = !date || reservation.date === date;
+      return matchesBand && matchesDate;
+    });
+    setFilteredReservations(filtered); // Solo actualizamos el estado local
   };
 
+  // Eliminar una reserva
   const handleDeleteReservation = async (reservation: Reservation) => {
     try {
       const response = await fetch("/api/reservations/deleteReservation", {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reservationId: reservation.reservationId,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId: reservation.reservationId }),
       });
 
       if (response.ok) {
-        setReservations(reservations.filter((r) => r !== reservation));
-        toast({
-          title: "Reserva eliminada con éxito",
-          action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
-        });
+        dispatch(deleteReservationAction(reservation.reservationId));
+        toast({ title: "Reserva eliminada con éxito" });
       } else {
-        console.error("Error al eliminar la reserva");
-        toast({
-          title: "Error al eliminar la reserva",
-          action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
-        });
+        toast({ title: "Error al eliminar la reserva" });
       }
     } catch (error) {
-      console.error("Error al eliminar la reserva", error);
-      toast({
-        title: "Error al eliminar la reserva",
-        action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
-      });
+      console.error("Error al eliminar la reserva:", error);
+      toast({ title: "Error al eliminar la reserva" });
     }
   };
 
@@ -181,7 +150,7 @@ const ReservationsPage = () => {
                   <SelectItem value="none">TODAS LAS RESERVAS</SelectItem>
                   {bands.map((band) => (
                     <SelectItem key={band.id} value={band.name}>
-                      {band.name.toUpperCase()} {/* Mostrar en mayúsculas */}
+                      {band.name.toUpperCase()}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -221,8 +190,8 @@ const ReservationsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reservations.length > 0 ? (
-                    reservations.map((reservation, index) => (
+                  {filteredReservations.length > 0 ? (
+                    filteredReservations.map((reservation, index) => (
                       <TableRow key={index}>
                         <TableCell>{reservation.bandName}</TableCell>
                         <TableCell>
@@ -234,7 +203,9 @@ const ReservationsPage = () => {
                           <div className="flex justify-center">
                             <ConfirmDeleteDialog
                               item={reservation}
-                              onConfirm={handleDeleteReservation}
+                              onConfirm={() =>
+                                handleDeleteReservation(reservation)
+                              }
                               itemName={reservation.bandName}
                               description="¿Estás seguro de que quieres eliminar la reserva de"
                               additionalInfo={reservation.date}

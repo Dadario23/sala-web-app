@@ -13,24 +13,30 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
-import Image from "next/image";
 import ClipLoader from "react-spinners/ClipLoader";
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
-import editIcon from "@/assets/create-outline.svg";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { ArrowLeftCircle } from "@geist-ui/icons";
-import { ArrowRightCircle } from "@geist-ui/icons";
 import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  setBands as setReduxBands,
+  selectBands,
+} from "@/lib/features/bands/bandsSlice";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog"; // Asumo que esto está presente
+import Image from "next/image";
+import editIcon from "@/assets/create-outline.svg"; // Asumo que existe el ícono
+import { deleteReservationsByBand } from "@/lib/features/reservations/reservationsSlice";
 
 const BandsPage = () => {
-  const [bands, setBands] = useState<{ id: string; name: string }[]>([]);
+  const dispatch = useAppDispatch();
+  const globalBands = useAppSelector(selectBands);
   const [newBandName, setNewBandName] = useState("");
   const [editingBand, setEditingBand] = useState<{
     id: string;
     name: string;
   } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -42,23 +48,24 @@ const BandsPage = () => {
         const data = await response.json();
 
         if (Array.isArray(data)) {
-          // Convertir todos los nombres de bandas a mayúsculas antes de establecer el estado
-          setBands(
-            data.map((band) => ({ ...band, name: band.name.toUpperCase() }))
+          dispatch(
+            setReduxBands(
+              data.map((band) => ({ ...band, name: band.name.toUpperCase() }))
+            )
           );
-        } else {
-          setBands([]);
         }
       } catch (error) {
         console.error("Error fetching bands:", error);
-        setBands([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadBands();
-  }, []);
+    // Si no hay bandas en el estado global, realiza el fetch
+    if (globalBands.length === 0) {
+      loadBands();
+    }
+  }, [dispatch, globalBands]);
 
   const handleAddBand = async () => {
     if (newBandName) {
@@ -68,16 +75,18 @@ const BandsPage = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: newBandName.toUpperCase() }), // Guardar en mayúsculas
+          body: JSON.stringify({ name: newBandName.toUpperCase() }),
         });
 
         const addedBand = await response.json();
 
         if (addedBand && addedBand.id && addedBand.name) {
-          setBands([
-            ...bands,
-            { id: addedBand.id, name: addedBand.name.toUpperCase() },
-          ]);
+          dispatch(
+            setReduxBands([
+              ...globalBands,
+              { id: addedBand.id, name: addedBand.name.toUpperCase() },
+            ])
+          );
           setNewBandName("");
 
           toast({
@@ -109,11 +118,21 @@ const BandsPage = () => {
       });
 
       if (response.ok) {
-        setBands((prevBands) => prevBands.filter((band) => band.id !== id));
+        // Asegurarse de que las reservas están cargadas antes de despachar la acción
+        /* if (reservations.length === 0) {
+          console.error("No hay reservas cargadas, abortando la eliminación");
+          return;
+        } */
+
+        // Elimina la banda del estado global
+        dispatch(setReduxBands(globalBands.filter((band) => band.id !== id)));
+
+        // Elimina todas las reservas asociadas a la banda del estado global
+        dispatch(deleteReservationsByBand(id));
 
         toast({
           title: "Banda eliminada con éxito",
-          description: "La banda ha sido eliminada.",
+          description: "La banda y sus reservas han sido eliminadas.",
           action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
         });
       } else {
@@ -135,19 +154,19 @@ const BandsPage = () => {
           body: JSON.stringify({
             id: editingBand.id,
             name: editingBand.name.toUpperCase(),
-          }), // Guardar en mayúsculas
+          }),
         });
 
         if (response.ok) {
           const updatedBand = await response.json();
 
-          const updatedBands = bands.map((band) =>
+          const updatedBands = globalBands.map((band) =>
             band.id === updatedBand.id
-              ? { ...band, name: updatedBand.name.toUpperCase() } // Asegurarse que el nombre esté en mayúsculas
+              ? { ...band, name: updatedBand.name.toUpperCase() }
               : band
           );
 
-          setBands(updatedBands);
+          dispatch(setReduxBands(updatedBands));
           setEditingBand(null);
 
           toast({
@@ -161,8 +180,6 @@ const BandsPage = () => {
       } catch (error) {
         console.error("Error editing band:", error);
       }
-    } else {
-      console.error("Editing band or its ID/Name is missing");
     }
   };
 
@@ -213,8 +230,8 @@ const BandsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bands.length > 0 ? (
-                  bands.map((band) => (
+                {globalBands.length > 0 ? (
+                  globalBands.map((band) => (
                     <TableRow key={band.id}>
                       <TableCell>
                         {editingBand && editingBand.id === band.id ? (
@@ -223,12 +240,12 @@ const BandsPage = () => {
                             onChange={(e) =>
                               setEditingBand({
                                 ...editingBand,
-                                name: e.target.value.toUpperCase(), // Convertir a mayúsculas al editar
+                                name: e.target.value.toUpperCase(),
                               })
                             }
                             onKeyDown={(e) =>
                               e.key === "Enter" && handleEditBand()
-                            } // Detecta la tecla Enter
+                            }
                             placeholder="Editar nombre de banda"
                           />
                         ) : (
@@ -255,10 +272,10 @@ const BandsPage = () => {
                               </span>
                             </div>
                             <ConfirmDeleteDialog
-                              item={band.id} // Asegúrate de pasar solo el ID
-                              onConfirm={handleDeleteBand} // Ya manejado en handleDeleteBand
+                              item={band.id}
+                              onConfirm={handleDeleteBand}
                               itemName={band.name}
-                              description="Sí la banda tiene reservas seran eliminadas ¿Estás seguro de que quieres eliminar la banda"
+                              description="¿Estás seguro de que quieres eliminar esta banda?"
                             />
                           </>
                         )}
