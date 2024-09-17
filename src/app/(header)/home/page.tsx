@@ -102,7 +102,7 @@ const HomePage = () => {
               reservationsForToday.map((reservation, index) => (
                 <Card
                   key={index}
-                  className={`${
+                  className={`transition-transform duration-300 transform hover:scale-105 hover:shadow-lg ${
                     isPastReservation(reservation.endTime, currentTime)
                       ? "opacity-50"
                       : ""
@@ -126,7 +126,7 @@ const HomePage = () => {
                 </Card>
               ))
             ) : (
-              <p>No hay reservas para hoy.</p>
+              <p></p>
             )}
           </div>
         </>

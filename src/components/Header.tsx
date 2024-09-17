@@ -110,12 +110,12 @@ export default function Header() {
             <ul className="flex flex-col items-center justify-between min-h-[250px]">
               <li className="border-b border-gray-400 my-8 uppercase">
                 <Link onClick={() => handleClick("/home")} href="/home">
-                  Inicio
+                  HOME
                 </Link>
               </li>
               <li className="border-b border-gray-400 my-8 uppercase">
                 <Link onClick={() => handleClick("/booking")} href="/booking">
-                  Realizar reserva
+                  RESERVAR
                 </Link>
               </li>
               <li className="border-b border-gray-400 my-8 uppercase">
@@ -123,12 +123,12 @@ export default function Header() {
                   onClick={() => handleClick("/reservations")}
                   href="/reservations"
                 >
-                  Lista de reservas
+                  LISTA DE RESERVAS
                 </Link>
               </li>
               <li className="border-b border-gray-400 my-8 uppercase">
                 <Link onClick={() => handleClick("/bands")} href="/bands">
-                  Bandas
+                  LISTA DE BANDAS
                 </Link>
               </li>
             </ul>

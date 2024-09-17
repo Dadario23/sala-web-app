@@ -25,7 +25,7 @@ const Footer = () => {
           >
             Portafolio
           </a>
-          {/* Puedes agregar tus redes sociales */}
+
           <Image src={logoWhatsapp} alt="logo-whatsapp" className="w-5" />
           <a
             href="https://github.com/Dadario23"
