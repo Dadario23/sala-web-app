@@ -17,7 +17,7 @@ const Footer = () => {
           >
             Contacto: dandrada23@gmail.com
           </a>
-          <a
+          {/* <a
             href=""
             className="text-sm hover:underline"
             target="_blank"
@@ -34,7 +34,7 @@ const Footer = () => {
             rel="noopener noreferrer"
           >
             <Github size={16} />
-          </a>
+          </a> */}
         </div>
       </div>
     </footer>
